@@ -1,0 +1,15 @@
+[package]
+name = "ray_tracer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+image = "0.25.2"
+rayon = "1.10.0"
+enum_dispatch = "0.3.13"
+indicatif = "0.17.8"
+rand = "0.8.5"
+yaml-rust = { version = "0.9.0", package = "yaml-rust2" }
+eframe = "0.29.1"
+png = "0.17.14"
+libm = "0.2.11"
