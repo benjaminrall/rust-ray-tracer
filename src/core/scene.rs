@@ -1,15 +1,14 @@
 use crate::core::{Hit, Photon, Ray};
-use crate::drawing::{Colour, TexCoords};
+use crate::drawing::Colour;
 use crate::lights::{Light, LightTrait};
 use crate::materials::{Material, MaterialTrait};
 use crate::objects::{Object, ObjectTrait};
-use crate::textures::{Texture, TextureTrait};
 use crate::utils::yaml::{
     parse_int, parse_string, parse_struct, parse_struct_array, parse_vec, ExtendYamlResult,
     FromYaml, YamlPropertyError,
 };
 use crate::utils::{get_default_progress_bar, select_first, FilterType, PhotonMap, ScatterType};
-use crate::{DIRECT_SAMPLES, MAX_INDIRECT_DEPTH, MAX_PHOTON_TRACE_DEPTH, MAX_RECURSE};
+use crate::{MAX_INDIRECT_DEPTH, MAX_PHOTON_TRACE_DEPTH, MAX_RECURSE};
 use rayon::prelude::*;
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
@@ -432,7 +431,7 @@ impl Scene {
     }
 
     /// Traces a ray through the scene and returns the first hit, if one exists.
-    pub fn trace(&self, ray: &Ray) -> Option<Hit> {
+    pub fn trace(&self, ray: &Ray) -> Option<Hit<'_>> {
         self.objects
             .iter()
             .filter_map(|object| select_first(object.intersection(ray)))

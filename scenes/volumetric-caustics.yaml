@@ -1,0 +1,111 @@
+width: 500
+height: 400
+
+camera:
+  type: RealisticCamera
+  position: [0, 0., 7.5]
+  look_at: [0, 0., 0]
+  up: [0, 1, 0]
+  fov: 32
+  focal_length: 7
+  aperture: 0.05
+
+scene:
+  global_photons: 100000
+  caustic_photons: 2500000
+  volume_photons: 10000000
+  materials:
+    - name: other
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.8, 0.8, 0.8]
+    - name: floor
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.4, 0.4, 0.4]
+    - name: left
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.7, 0.4, 0.4]
+    - name: right
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.4, 0.4, 0.7]
+    - name: glass
+      type: GlobalMaterial
+      refract_weight: [1, 1, 1]
+      ior: 1.5
+    - name: light
+      type: EmissiveMaterial
+      intensity: [400, 380, 350]
+    - name: volume
+      type: VolumeMaterial
+      colour:
+        srgb: [0.6, 0.6, 0.6]
+      density: 0.25
+
+  objects:
+    # Floor
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [0, 0, 4]
+      edge2: [4, 0, 0]
+      material: other
+
+    # Back wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 3.2, 0]
+      material: other
+
+    # Right wall
+    - type: Quad
+      point: [2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: right
+
+    # Left wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: left
+
+    # Ceiling
+    - type: Quad
+      point: [-2, 1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 0, 4]
+      material: other
+
+    # Glass sphere
+    - type: Sphere
+      position: [0, 0.4, 0]
+      radius: 0.65
+      material: glass
+
+    # Constant scattering volume
+    - type: ConstantMedium
+      volume:
+        type: AABox
+        centre: [0, 0, 0]
+        size: [2, 1.6, 2]
+        material: none
+      density: 0.25
+      material: volume
+
+    # Light object
+    - type: Quad
+      point: [-0.05, 1.59, -0.05]
+      edge1: [0.1, 0, 0]
+      edge2: [0, 0, 0.1]
+      material: light
+
+  lights:
+    - type: QuadLight
+      intensity: [400, 380, 350]
+      point: [-0.05, 1.59, -0.05]
+      edge1: [0.1, 0, 0]
+      edge2: [0, 0, 0.1]

@@ -1,0 +1,172 @@
+width: 500
+height: 400
+
+camera:
+  type: RealisticCamera
+  position: [0, 0., 7.5]
+  look_at: [0, 0., 0]
+  up: [0, 1, 0]
+  fov: 32
+  focal_length: 7
+  aperture: 0.2
+
+scene:
+  global_photons: 2048
+  materials:
+    - name: other
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.8, 0.8, 0.8]
+    - name: left
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.7, 0.4, 0.4]
+    - name: right
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.4, 0.4, 0.7]
+    - name: teapot
+      type: PhongMaterial
+      diffuse:
+        srgb: [0.8, 0.8, 0.8]
+      specular: [0.008, 0.008, 0.008]
+      alpha: 100.0
+      ior: 1.5
+    - name: marble
+      type: PhongMaterial
+      diffuse:
+        type: MarbleTexture
+        scale: 8
+      alpha: 16
+    - name: light
+      type: EmissiveMaterial
+      intensity: [8, 8, 8]
+
+  objects:
+    # Floor
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 0, 4]
+      material: other
+
+    # Back wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 3.2, 0]
+      material: other
+
+    # Right wall
+    - type: Quad
+      point: [2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: right
+
+    # Left wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: left
+
+    # Ceiling
+    - type: Quad
+      point: [-2, 1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 0, 4]
+      material: other
+
+    # Light object
+    - type: Quad
+      point: [-0.7, 1.595, 0]
+      edge1: [1.4, 0, 0]
+      edge2: [0, 0, 1.2]
+      material: light
+
+    # CSG Marble Object
+    - type: CSG
+      op: difference
+      left:
+        type: AABox
+        centre: [-0.9, -0.95, -0.2]
+        size: [0.65, 0.65, 0.65]
+        material: marble
+      right:
+        type: Sphere
+        position: [-0.9, -0.95, -0.2]
+        radius: 0.8
+        material: marble
+      transforms:
+        - scale: 0.75
+        - rotate_y: 30
+        - translate: [0.1, -0.4, -0.2]
+
+    # Scattered Teapots using instancing
+    - type: Instances
+      base:
+        type: PolyMesh
+        filename: "scenes/models/teapot.obj"
+        material: teapot
+        smooth: true
+        transforms:
+          - scale: 0.2
+      instances:
+        # Front cluster (near camera)
+        - transforms:
+            - rotate_y: 45
+            - translate: [0.9, -1.58, 1.2]
+        - transforms:
+            - rotate_y: -15
+            - translate: [0.4, -1.58, 1.5]
+        - transforms:
+            - rotate_y: 30
+            - translate: [-0.95, -1.58, 1.5]
+        - transforms:
+            - rotate_y: 110
+            - translate: [-0.6, -1.58, 1.4]
+        - transforms:
+            - rotate_y: -75
+            - translate: [-1.4, -1.58, 1.1]
+
+        # Mid cluster (around the CSG object)
+        - transforms:
+            - rotate_y: 15
+            - translate: [-1.6, -1.58, 0.2]
+        - transforms:
+            - rotate_y: 135
+            - translate: [0.2, -1.58, 0.6]
+        - transforms:
+            - rotate_y: 45
+            - translate: [0.8, -1.58, -0.3]
+        - transforms:
+            - rotate_y: 88
+            - translate: [1.2, -1.58, 0.5]
+        - transforms:
+            - rotate_y: -120
+            - translate: [1.7, -1.58, -0.1]
+
+        # Back cluster (behind the CSG object)
+        - transforms:
+            - rotate_y: -30
+            - translate: [-1.3, -1.58, -0.8]
+        - transforms:
+            - rotate_y: 190
+            - translate: [-0.2, -1.58, -0.9]
+        - transforms:
+            - rotate_y: -105
+            - translate: [0.8, -1.58, -1.3]
+        - transforms:
+            - rotate_y: 22
+            - translate: [1.5, -1.58, -1.1]
+        - transforms:
+            - rotate_y: 270
+            - translate: [1.8, -1.58, 1.6]
+
+  lights:
+    - type: QuadLight
+      intensity: [8, 8, 8]
+      point: [-0.7, 1.59, 0]
+      edge1: [1.4, 0, 0]
+      edge2: [0, 0, 1.2]

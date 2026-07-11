@@ -1,6 +1,6 @@
 use crate::utils::yaml::{parse_float, parse_float_array, FromYaml, YamlPropertyError};
 use crate::utils::{random_float, random_range};
-use std::f64::consts::{FRAC_1_PI, FRAC_2_PI, PI};
+use std::f64::consts::{FRAC_2_PI, PI};
 use std::fmt::{Display, Formatter};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,

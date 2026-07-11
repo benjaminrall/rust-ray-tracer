@@ -1,7 +1,7 @@
 use crate::core::{Hit, Photon, Ray, Scene};
 use crate::drawing::Colour;
 use crate::lights::{Light, LightTrait};
-use crate::materials::{LambertianMaterial, MaterialTrait};
+use crate::materials::MaterialTrait;
 use crate::utils::yaml::{parse_float, parse_struct, FromYaml, YamlPropertyError};
 use crate::utils::{random_float, ScatterType, Vector};
 use crate::{DIRECT_SAMPLES, EPSILON};

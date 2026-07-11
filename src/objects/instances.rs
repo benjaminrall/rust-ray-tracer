@@ -31,7 +31,7 @@ impl Instances {
 }
 
 impl ObjectTrait for Instances {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Transforms ray into the instances' object space
         let ray = ray.to_object_space(&self.transform);
 

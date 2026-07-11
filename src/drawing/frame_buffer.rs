@@ -5,6 +5,7 @@ use png::{Decoder, Encoder};
 use rayon::iter::ParallelIterator;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
+use crate::utils::normalise_filepath;
 
 /// The FrameBuffer class creates a buffer of RGB values that can be written to a PNG file.
 pub struct FrameBuffer {
@@ -135,7 +136,7 @@ impl FrameBuffer {
         encoder
             .add_text_chunk(
                 String::from("scene_filename"),
-                self.scene_filename_metadata.to_string(),
+                normalise_filepath(&self.scene_filename_metadata),
             )
             .expect("Failed to add samples metadata to file.");
 

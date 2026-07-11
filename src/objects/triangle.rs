@@ -52,7 +52,7 @@ impl ObjectTrait for Triangle {
     /// Code adapted from the Möller–Trumbore ray-triangle intersection algorithm paper, which can
     /// be found here:
     /// https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Calculates determinant
         let p_vec = Vector::cross(&ray.direction, &self.edge2);
         let det = Vector::dot(&self.edge1, &p_vec);

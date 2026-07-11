@@ -1,0 +1,109 @@
+width: 500
+height: 400
+
+camera:
+  type: RealisticCamera
+  position: [0, 0., 7.5]
+  look_at: [0, 0., 0]
+  up: [0, 1, 0]
+  fov: 32
+  focal_length: 6.25
+  aperture: 0.5
+
+scene:
+  global_photons: 2048
+  materials:
+    - name: other
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.8, 0.8, 0.8]
+    - name: left
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.7, 0.4, 0.4]
+    - name: right
+      type: LambertianMaterial
+      albedo:
+        srgb: [0.4, 0.4, 0.7]
+    - name: earth
+      type: PhongMaterial
+      diffuse:
+        type: ImageTexture
+        filename: "scenes/textures/earth.jpg"
+      alpha: 8
+    - name: teapot
+      type: PhongMaterial
+      diffuse:
+        srgb: [0.8, 0.8, 0.8]
+      specular: [0.008, 0.008, 0.008]
+      alpha: 100
+      ior: 1.5
+    - name: light
+      type: EmissiveMaterial
+      intensity: [8, 8, 8]
+
+  objects:
+    # Floor
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 0, 4]
+      material: other
+
+    # Back wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 3.2, 0]
+      material: other
+
+    # Right wall
+    - type: Quad
+      point: [2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: right
+
+    # Left wall
+    - type: Quad
+      point: [-2, -1.6, -2]
+      edge1: [0, 3.2, 0]
+      edge2: [0, 0, 4]
+      material: left
+
+    # Ceiling
+    - type: Quad
+      point: [-2, 1.6, -2]
+      edge1: [4, 0, 0]
+      edge2: [0, 0, 4]
+      material: other
+
+    # Teapot
+    - type: PolyMesh
+      filename: "scenes/models/teapot.obj"
+      material: teapot
+      smooth: true
+      transforms:
+        - rotate_y: 170
+        - scale: 0.7
+        - translate: [0.3, -1.45, 1.7]
+
+    # Earth sphere
+    - type: Sphere
+      position: [-0.9, -0.95, -0.2]
+      radius: 0.65
+      material: earth
+
+    # Light object
+    - type: Quad
+      point: [-0.7, 1.595, 0]
+      edge1: [1.4, 0, 0]
+      edge2: [0, 0, 1.2]
+      material: light
+
+  lights:
+    - type: QuadLight
+      intensity: [8, 8, 8]
+      point: [-0.7, 1.59, 0]
+      edge1: [1.4, 0, 0]
+      edge2: [0, 0, 1.2]

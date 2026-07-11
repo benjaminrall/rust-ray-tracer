@@ -32,7 +32,7 @@ pub enum Object {
 /// Trait which must be implemented by all `Object` structs.
 pub trait ObjectTrait {
     /// Returns all points of intersection, sorted by `t`, if the given ray intersects the object.
-    fn intersection(&self, ray: &Ray) -> Vec<Hit>;
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>>;
 
     /// Applies a transformation to the object.
     fn apply_transform(&mut self, transform: Transform);

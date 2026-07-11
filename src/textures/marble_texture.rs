@@ -2,7 +2,7 @@ use crate::core::Hit;
 use crate::drawing::{Colour, TexCoords};
 use crate::textures::TextureTrait;
 use crate::utils::yaml::{parse_float, FromYaml, YamlPropertyError};
-use crate::utils::{layered_noise, noise, turbulence, Vertex};
+use crate::utils::turbulence;
 use yaml_rust::Yaml;
 
 #[derive(Debug)]

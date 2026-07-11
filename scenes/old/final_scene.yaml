@@ -1,0 +1,270 @@
+width: 512
+height: 512
+gamma: 2.2
+
+camera:
+  type: RealisticCamera
+  position: [3.74443, 1.68231, 4.26166]
+  look_at: [0, 0.6, 0.94]
+  up: [0, 1, 0]
+  fov: 45
+  focal_length: 5
+  aperture: 0.16
+
+scene:
+  global_photons: 16384
+  caustic_photons: 10000000
+
+  materials:
+    - name: table
+      type: PhongMaterial
+      diffuse:
+        type: ImageTexture
+        filename: "textures/wood2.jpg"
+      specular: [0, 0, 0]
+      alpha: 1
+    - name: frame
+      type: PhongMaterial
+      diffuse: [0.1, 0.1, 0.1]
+      specular: [0, 0, 0]
+      alpha: 1
+    - name: pic
+      type: PhongMaterial
+      diffuse:
+        type: ImageTexture
+        filename: "textures/picture.png"
+      specular: [0, 0, 0]
+      alpha: 1
+    - name: chair
+      type: PhongMaterial
+      diffuse:
+        type: ImageTexture
+        filename: "textures/wood.jpg"
+      alpha: 1
+    - name: teacup
+      type: GlobalMaterial
+      refract_weight: [1, 1, 1]
+      ior: 1.45
+    - name: tea
+      type: GlobalMaterial
+      refract_weight: [0.845, 0.585, 0.39]
+      ior: 1.55
+    - name: teapot
+      type: PhongMaterial
+      diffuse: [0.8, 0.8, 0.8]
+      specular: [0.05, 0.05, 0.05]
+      alpha: 100
+      ior: 1.5
+    - name: wax
+      type: PhongMaterial
+      diffuse: [0.74, 0.72, 0.7]
+      specular: [0, 0, 0]
+      alpha: 1
+      ior: 1.5
+    - name: wick
+      type: PhongMaterial
+      diffuse: [0.035, 0.035, 0.035]
+      alpha: 10
+      ior: 1.4
+    - name: cover
+      type: GlobalMaterial
+      refract_weight: [1, 1, 1]
+      ior: 1.5
+      alpha: 8
+    - name: walls
+      type: LambertianMaterial
+      albedo: [0.8, 0.8, 0.8]
+    - name: floor
+      type: LambertianMaterial
+      albedo: [0.8, 0.37, 0.37]
+    #    - name: candle
+    #      type: EmissiveMaterial
+    #      intensity: [ 12.06371579,  6.03185789,  3.01592895 ]
+    - name: candle1
+      type: EmissiveVolumeMaterial
+      intensity:
+        type: YGradientTexture
+        scale: [4.0384, 2.0192, 1.0096]
+        colours:
+          - [0.01, 0.01, 0.92]
+          - [0.97, 0.8, 0.6]
+          - [1, 1.5, 1.75]
+          - [0.97, 0.3, 0.3]
+        percentages: [0.18, 0.25, 0.42, 0.15]
+        min: 0.398
+        max: 0.618
+      density: 0.7
+    - name: candle2
+      type: EmissiveVolumeMaterial
+      intensity:
+        type: YGradientTexture
+        scale: [4.0384, 2.0192, 1.0096]
+        colours:
+          - [0.01, 0.01, 0.92]
+          - [0.97, 0.8, 0.6]
+          - [1, 1.5, 1.75]
+          - [0.97, 0.3, 0.3]
+        percentages: [0.18, 0.25, 0.42, 0.15]
+        min: 0.77
+        max: 0.99
+      density: 0.7
+
+  objects:
+    # TABLE
+    - type: PolyMesh
+      filename: "models/table.obj"
+      material: table
+    # CHAIR
+    - type: PolyMesh
+      filename: "models/chair.obj"
+      material: chair
+      transforms:
+        - scale: 1.4
+
+    # TEACUP COMPONENTS
+    - type: Group
+      objects:
+        - type: PolyMesh
+          filename: "models/teacup.obj"
+          material: teacup
+        - type: PolyMesh
+          filename: "models/tea.obj"
+          material: tea
+      transforms:
+        - translate: [-0.2, 0, 1.05]
+
+    # TEAPOT
+    - type: PolyMesh
+      filename: "models/teapot.obj"
+      material: teapot
+      smooth: true
+
+    # PICTURE FRAME
+    - type: Group
+      objects:
+        - type: PolyMesh
+          filename: "models/frame.obj"
+          material: frame
+        - type: Quad
+          point: [-4.9, 0.9, 0.15]
+          edge1: [0, 2.2, 0]
+          edge2: [0, 0, 1.5]
+          material: pic
+      transforms:
+        - translate: [0, 0.2, 0.2]
+
+    # FRONT CANDLE
+    - type: Group
+      objects:
+        - type: PolyMesh
+          filename: "models/wick.obj"
+          material: wick
+          transforms:
+            - translate: [0, -0.012, 0]
+            - stretch_y: 2
+        - type: PolyMesh
+          filename: "models/wax.obj"
+          material: wax
+          transforms:
+            - stretch_y: 1.05
+        - type: PolyMesh
+          filename: "models/cover.obj"
+          material: cover
+          transforms:
+            - stretch_y: 1.5
+        - type: ConstantMedium
+          volume:
+            type: PolyMesh
+            filename: "models/flame.obj"
+            material: none
+            transforms:
+              - scale: 0.175
+              - translate: [0.56250, 0.508, 2.9125]
+          density: 6
+          material: candle1
+      transforms:
+        - translate: [-0.2, 0, -0.2]
+
+    # BACK CANDLE
+    - type: Group
+      objects:
+        - type: PolyMesh
+          filename: "models/wick.obj"
+          material: wick
+          transforms:
+            - stretch_y: 4
+            - translate: [0, -0.12, 0]
+        - type: PolyMesh
+          filename: "models/rotated_tall_wax.obj"
+          material: wax
+          transforms:
+            - stretch_y: 1
+        - type: PolyMesh
+          filename: "models/cover.obj"
+          material: cover
+          transforms:
+            - stretch_y: 3
+        - type: ConstantMedium
+          volume:
+            type: PolyMesh
+            filename: "models/flame.obj"
+            material: none
+            transforms:
+              - scale: 0.175
+              - translate: [0.56250, 0.88, 2.9125]
+          density: 6
+          material: candle2
+      transforms:
+        - translate: [0.8, 0, -2.4]
+
+    # Floor
+    - type: Quad
+      point: [-5, -3.52, -5]
+      edge1: [0, 0, 18]
+      edge2: [15, 0, 0]
+      material: floor
+
+    # Back wall
+    - type: Quad
+      point: [-5, -3.52, -5]
+      edge1: [15, 0, 0]
+      edge2: [0, 8, 0]
+      material: walls
+
+    # Right wall
+    #    - type: Quad
+    #      point: [ 10, -3.52, -5 ]
+    #      edge1: [ 0, 8, 0 ]
+    #      edge2: [ 0, 0, 18 ]
+    #      material: walls
+
+    # Left wall
+    - type: Quad
+      point: [-5, -3.52, -5]
+      edge1: [0, 8, 0]
+      edge2: [0, 0, 18]
+      material: walls
+
+    # Ceiling
+    - type: Quad
+      point: [-5, 4.48, -5]
+      edge1: [15, 0, 0]
+      edge2: [0, 0, 18]
+      material: walls
+
+    # Front wall
+  #    - type: Quad
+  #      point: [ 10, -3.52, 13 ]
+  #      edge1: [ -15, 0, 0 ]
+  #      edge2: [ 0, 8, 0 ]
+  #      material: walls
+
+  lights:
+    - type: SphereLight
+      position: [0.36250, 0.508, 2.7125]
+      radius: 0.104
+      intensity: [35, 17.5, 8.75]
+    - type: SphereLight
+      position: [1.36250, 0.88, 0.5125]
+      radius: 0.104
+      intensity: [35, 17.5, 8.75]

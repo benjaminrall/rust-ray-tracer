@@ -2,7 +2,7 @@ use crate::core::Ray;
 use crate::drawing::Colour;
 use crate::lights::LightTrait;
 use crate::utils::yaml::{parse_float, parse_struct, FromYaml, YamlPropertyError};
-use crate::utils::{random_float, Vector, Vertex};
+use crate::utils::{Vector, Vertex};
 use std::f64::consts::PI;
 use yaml_rust::Yaml;
 

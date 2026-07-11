@@ -143,6 +143,17 @@ pub fn add_yaml_field(yaml: Yaml, key: &str, field: &str) -> Yaml {
     Yaml::Hash(yaml_hash)
 }
 
+/// Normalises file paths to Unix style for cross-platform consistency.
+pub fn normalise_filepath(path: &str) -> String {
+    let mut normalised = path.replace('\\', "/");
+
+    if normalised.starts_with("./") {
+        normalised = normalised[2..].to_string();
+    }
+
+    normalised
+}
+
 /// Reads in a PNG file for continued rendering and returns its contents as float pixel values,
 /// along with its expected metadata.
 pub fn read_png(filename: &str) -> (Vec<[f64; 3]>, usize, String) {

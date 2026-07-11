@@ -1,7 +1,6 @@
 use crate::core::{Hit, Ray};
 use crate::drawing::Colour;
-use crate::lights::{LightTrait, QuadLight};
-use crate::objects::Quad;
+use crate::lights::LightTrait;
 use crate::utils::yaml::{parse_struct, FromYaml, YamlPropertyError};
 use crate::utils::{random_float, Vector, Vertex};
 use crate::EPSILON;

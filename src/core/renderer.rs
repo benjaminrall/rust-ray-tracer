@@ -4,7 +4,7 @@ use crate::drawing::FrameBuffer;
 use crate::utils::yaml::{
     parse_int, parse_string, parse_struct, FromYaml, YamlPropertyError,
 };
-use crate::utils::{add_yaml_field, read_png, read_yaml};
+use crate::utils::{add_yaml_field, normalise_filepath, read_png, read_yaml};
 use crate::{HEIGHT, WIDTH};
 use yaml_rust::Yaml;
 
@@ -42,6 +42,7 @@ impl Renderer {
     pub fn from_png(filename: &str) -> Result<Renderer, YamlPropertyError> {
         // Reads in pixel values and relevant metadata from the PNG
         let (pixels, samples, scene_filename) = read_png(filename);
+        let scene_filename = normalise_filepath(&scene_filename);
 
         // Loads the renderer from the YAML file referenced in metadata
         let yaml_contents = add_yaml_field(

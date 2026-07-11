@@ -1,6 +1,5 @@
 use crate::textures::{ColourTexture, Texture};
 use crate::utils::yaml::{parse_float, parse_float_array, parse_vec, FromYaml, YamlPropertyError};
-use libm::frexp;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
 use yaml_rust::Yaml;
 

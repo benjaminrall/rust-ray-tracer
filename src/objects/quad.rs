@@ -1,13 +1,12 @@
 use crate::core::{Hit, Ray};
+use crate::drawing::TexCoords;
 use crate::objects::ObjectTrait;
 use crate::utils::yaml::{
     parse_string, parse_struct, parse_transforms, FromYaml, YamlPropertyError,
 };
 use crate::utils::{Transform, Vector, Vertex, AABB};
 use crate::EPSILON;
-use std::ops::Neg;
 use yaml_rust::Yaml;
-use crate::drawing::TexCoords;
 
 #[derive(Debug)]
 /// Four vertex quadrilateral primitive.
@@ -53,7 +52,7 @@ impl ObjectTrait for Quad {
     ///
     /// Code uses an adapted form of the Möller–Trumbore ray-triangle intersection used in `Triangle`,
     /// with adjusted conditions for what is considered inside the primitive after calculating barycentric coordinates.
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Transforms ray into the quad's object space
         let ray = ray.to_object_space(&self.transform);
 

@@ -1,6 +1,6 @@
 use crate::core::Hit;
 use crate::drawing::{Colour, TexCoords};
-use crate::textures::{CheckerTexture, TextureTrait};
+use crate::textures::TextureTrait;
 use crate::utils::yaml::{
     parse_float, parse_float_array, parse_struct, parse_struct_array, parse_vec, FromYaml,
     YamlPropertyError,
@@ -50,7 +50,7 @@ impl TextureTrait for YGradientTexture {
         }
 
         // Linearly interpolates based on the y value and colour proportions to return a soft gradient
-        let mut y_proportion = (y - self.min_range) / self.range_size;
+        let y_proportion = (y - self.min_range) / self.range_size;
         let mut cumulative = 0.0;
         for i in 0..self.percentages.len() {
             cumulative += self.percentages[i];

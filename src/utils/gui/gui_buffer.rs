@@ -1,9 +1,6 @@
-use crate::drawing::Colour;
-
 /// Wrapper for the Ray Tracer GUI's image data RGB buffer.
 pub struct GUIBuffer {
     width: usize,
-    height: usize,
     image_data: Vec<u8>,
 }
 
@@ -13,7 +10,6 @@ impl GUIBuffer {
         let image_data = vec![0; width * height * 3];
         GUIBuffer {
             width,
-            height,
             image_data,
         }
     }

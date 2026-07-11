@@ -46,7 +46,7 @@ impl Sphere {
 }
 
 impl ObjectTrait for Sphere {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Transforms ray into the sphere's object space
         let ray = ray.to_object_space(&self.transform);
 

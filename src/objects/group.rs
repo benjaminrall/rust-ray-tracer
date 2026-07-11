@@ -29,7 +29,7 @@ impl Group {
 }
 
 impl ObjectTrait for Group {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Sets initial start and end values for the interval
         let mut start = f64::MIN;
         let mut end = f64::MAX;

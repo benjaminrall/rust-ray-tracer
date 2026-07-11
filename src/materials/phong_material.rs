@@ -4,9 +4,9 @@ use crate::lights::{Light, LightTrait};
 use crate::materials::MaterialTrait;
 use crate::textures::{Texture, TextureTrait};
 use crate::utils::yaml::{parse_float, parse_struct, FromYaml, YamlPropertyError};
-use crate::utils::{normalise_colour_coefficients, random_float, ScatterType, Vector};
+use crate::utils::{random_float, ScatterType, Vector};
 use crate::{AIR_IOR, DIRECT_SAMPLES, EPSILON, INDIRECT_SAMPLES, SPECULAR_SAMPLES};
-use std::f64::consts::{FRAC_1_PI, PI};
+use std::f64::consts::FRAC_1_PI;
 use yaml_rust::Yaml;
 
 #[derive(Debug)]

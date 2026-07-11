@@ -1,5 +1,4 @@
 use crate::core::{Hit, Ray};
-use crate::materials::{LambertianMaterial, VolumeMaterial};
 use crate::objects::{Object, ObjectTrait};
 use crate::utils::yaml::{
     parse_float, parse_string, parse_struct, parse_transforms, FromYaml, YamlPropertyError,
@@ -29,7 +28,7 @@ impl ConstantMedium {
 }
 
 impl ObjectTrait for ConstantMedium {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Checks that the ray is not inside an object
         if ray.inside {
             return Vec::new();

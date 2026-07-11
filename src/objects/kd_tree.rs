@@ -93,7 +93,7 @@ impl KDTree {
 }
 
 impl ObjectTrait for KDTree {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Transforms ray into the tree's object space
         let ray = ray.to_object_space(&self.transform);
 

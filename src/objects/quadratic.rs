@@ -100,7 +100,7 @@ impl Quadratic {
 }
 
 impl ObjectTrait for Quadratic {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         // Extract ray position and direction components for readability
         let (px, py, pz) = (ray.position.x, ray.position.y, ray.position.z);
         let (dx, dy, dz) = (ray.direction.x, ray.direction.y, ray.direction.z);

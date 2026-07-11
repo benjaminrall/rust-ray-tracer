@@ -6,7 +6,6 @@
 // https://mrl.cs.nyu.edu/~perlin/noise/
 
 use crate::utils::Vertex;
-use std::ops::MulAssign;
 
 /// Permutations for the hash function, used by Ken Perlin's original implementation of Perlin noise
 const P: [usize; 512] = [

@@ -1,5 +1,4 @@
-use crate::drawing::Colour;
-use crate::utils::gui::{GUIBuffer, GUIState};
+use crate::utils::gui::GUIState;
 use eframe::egui::{
     CentralPanel, ColorImage, Context, Layout, TextureHandle, Vec2, ViewportBuilder,
 };
@@ -60,7 +59,7 @@ impl RayTracerGUI {
 }
 
 impl App for RayTracerGUI {
-    fn update(&mut self, ctx: &Context, frame: &mut Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         let mut state = self.state.lock().unwrap();
 
         // Create or update the texture for the GUI

@@ -292,7 +292,7 @@ impl PolyMesh {
 }
 
 impl ObjectTrait for PolyMesh {
-    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+    fn intersection(&self, ray: &Ray) -> Vec<Hit<'_>> {
         self.tree.intersection(ray)
     }
 
