@@ -1,7 +1,7 @@
 use crate::core::Hit;
 use crate::drawing::{srgb_to_linear, Colour, TexCoords};
 use crate::textures::TextureTrait;
-use crate::utils::yaml::{parse_string, FromYaml, YamlPropertyError};
+use crate::utils::yaml::{parse_string, parse_bool, FromYaml, YamlPropertyError};
 use image::{DynamicImage, GenericImageView};
 use yaml_rust::Yaml;
 
@@ -9,16 +9,18 @@ use yaml_rust::Yaml;
 /// Texture that uses UV texture coordinates to apply image data to an object.
 pub struct ImageTexture {
     data: DynamicImage,
+    is_srgb: bool,
 }
 
 impl ImageTexture {
     pub const COLOUR_SCALE_RECIP: f64 = 1.0 / 255.0;
 
     /// Creates a new image texture, loading the given file for the texture map.
-    pub fn new(filename: &str) -> ImageTexture {
+    pub fn new(filename: &str, is_srgb: bool) -> ImageTexture {
         ImageTexture {
             data: image::open(filename)
                 .expect(format!("Unable to open image {}.", filename).as_str()),
+            is_srgb,
         }
     }
 }
@@ -43,20 +45,26 @@ impl TextureTrait for ImageTexture {
         // Gets the pixel corresponding to the given texture coordinates
         let pixel = self.data.get_pixel(i, j);
 
-        // Returns the scaled pixel values as a colour
-        let r = srgb_to_linear(pixel[0] as f64 * Self::COLOUR_SCALE_RECIP);
-        let g = srgb_to_linear(pixel[1] as f64 * Self::COLOUR_SCALE_RECIP);
-        let b = srgb_to_linear(pixel[2] as f64 * Self::COLOUR_SCALE_RECIP);
-
-        Colour::new(r, g, b)
+        // Scales pixel values and converts to linear colour space if necessary
+        if self.is_srgb {
+            let r = srgb_to_linear(pixel[0] as f64 * Self::COLOUR_SCALE_RECIP);
+            let g = srgb_to_linear(pixel[1] as f64 * Self::COLOUR_SCALE_RECIP);
+            let b = srgb_to_linear(pixel[2] as f64 * Self::COLOUR_SCALE_RECIP);
+            Colour::new(r, g, b)
+        } else {
+            let r = pixel[0] as f64 * Self::COLOUR_SCALE_RECIP;
+            let g = pixel[1] as f64 * Self::COLOUR_SCALE_RECIP;
+            let b = pixel[2] as f64 * Self::COLOUR_SCALE_RECIP;
+            Colour::new(r, g, b)
+        }
     }
 }
 
 /// Implements loading an `ImageTexture` from a YAML file.
 impl FromYaml for ImageTexture {
     fn from_yaml(yaml: &Yaml) -> Result<ImageTexture, YamlPropertyError> {
-        // Parses the filename for the texture
         let filename = parse_string(yaml, "filename")?;
-        Ok(ImageTexture::new(&filename))
+        let is_srgb = parse_bool(yaml, "is_srgb").unwrap_or(true);
+        Ok(ImageTexture::new(&filename, is_srgb))
     }
 }
