@@ -12,13 +12,13 @@ use yaml_rust::Yaml;
 #[derive(Debug)]
 /// Struct to represent a purely Lambertian diffuse material.
 pub struct LambertianMaterial {
-    diffuse: Texture, // Surface colour of the material as a texture
+    albedo: Texture, // Surface colour of the material as a texture
 }
 
 impl LambertianMaterial {
     /// Creates a new `LambertianMaterial` with the given diffuse surface colour.
-    pub fn new(diffuse: Texture) -> LambertianMaterial {
-        LambertianMaterial { diffuse }
+    pub fn new(albedo: Texture) -> LambertianMaterial {
+        LambertianMaterial { albedo }
     }
 }
 
@@ -39,7 +39,7 @@ impl MaterialTrait for LambertianMaterial {
             let ray = Ray::offset(hit.position, d);
             estimate += scene.indirect_raytrace(ray);
         }
-        let indirect = (estimate / monte_carlo_rays as f64) * self.diffuse.get_colour_at(hit);
+        let indirect = (estimate / monte_carlo_rays as f64) * self.albedo.get_colour_at(hit);
 
         // Computes caustic component of the colour
         let caustic = scene.caustic_radiance_estimate(hit, |photon| {
@@ -90,7 +90,7 @@ impl MaterialTrait for LambertianMaterial {
         // Additionally scaled by the probability density function of Lambertian diffuse (1 / pi)
         if total_samples > 0 {
             diffuse *=
-                self.diffuse.get_colour_at(hit) * light.get_area() / (total_samples as f64 * PI);
+                self.albedo.get_colour_at(hit) * light.get_area() / (total_samples as f64 * PI);
         }
 
         diffuse
@@ -98,7 +98,7 @@ impl MaterialTrait for LambertianMaterial {
 
     fn compute_per_photon(&self, _incident: &Ray, hit: &Hit, photon: &Photon) -> Colour {
         // Gets the photon's colour contribution using its power and the Lambertian diffuse BRDF
-        self.diffuse.get_colour_at(hit)
+        self.albedo.get_colour_at(hit)
             * Vector::dot(&hit.normal, &photon.direction).max(0.0)
             * photon.power
     }
@@ -110,7 +110,7 @@ impl MaterialTrait for LambertianMaterial {
         power: &mut Colour,
     ) -> Option<(Ray, ScatterType)> {
         // Calculates the probability of there being a diffuse reflection
-        let albedo = self.diffuse.get_colour_at(hit);
+        let albedo = self.albedo.get_colour_at(hit);
         let pd = (albedo * *power).max() / power.max();
 
         // Performs Russian Roulette using the diffuse probability

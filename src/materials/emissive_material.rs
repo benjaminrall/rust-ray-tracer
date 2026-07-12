@@ -5,17 +5,19 @@ use crate::materials::MaterialTrait;
 use crate::utils::yaml::{parse_struct, FromYaml, YamlPropertyError};
 use crate::utils::ScatterType;
 use yaml_rust::Yaml;
+use crate::textures::{TextureTrait, Texture};
 
 #[derive(Debug)]
 /// Material to represent emissive objects.
-/// Works by returning a single flat colour value, which should be equal to the intensity of the light source.
+/// Works by returning a flat colour (optionally from a texture),
+/// which should be equal to the intensity of the light source.
 pub struct EmissiveMaterial {
-    intensity: Colour,
+    intensity: Texture,
 }
 
 impl EmissiveMaterial {
     /// Creates a new `EmissiveMaterial` with the given intensity.
-    pub fn new(intensity: Colour) -> EmissiveMaterial {
+    pub fn new(intensity: Texture) -> EmissiveMaterial {
         EmissiveMaterial { intensity }
     }
 }
@@ -31,7 +33,7 @@ impl MaterialTrait for EmissiveMaterial {
     ) -> Colour {
         // Returns the intensity only if the emitting side of the object was hit
         if hit.entering {
-            self.intensity
+            self.intensity.get_colour_at(hit)
         } else {
             Colour::black()
         }

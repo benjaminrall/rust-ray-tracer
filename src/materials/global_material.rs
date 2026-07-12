@@ -6,12 +6,13 @@ use crate::utils::yaml::{parse_float, parse_struct, FromYaml, YamlPropertyError}
 use crate::utils::{normalise_colour_coefficients, random_float, ScatterType, Vector};
 use crate::{AIR_IOR, SPECULAR_SAMPLES};
 use yaml_rust::Yaml;
+use crate::textures::{TextureTrait, Texture};
 
 #[derive(Debug)]
 /// Material that supports both reflection and refraction.
 pub struct GlobalMaterial {
-    reflect_weight: Colour, // Weighting of reflection
-    refract_weight: Colour, // Weighting of refraction
+    reflect_weight: Texture, // Weighting of reflection
+    refract_weight: Texture, // Weighting of refraction
 
     alpha: f64, // Phong shininess coefficient
     ior: f64,   // Index of refraction
@@ -27,18 +28,14 @@ impl GlobalMaterial {
     /// * `alpha`: Phong shininess coefficient for the material.
     /// * `ior`: Index of refraction of the material.
     pub fn new(
-        reflect_weight: Colour,
-        refract_weight: Colour,
+        reflect_weight: Texture,
+        refract_weight: Texture,
         alpha: f64,
         ior: f64,
     ) -> GlobalMaterial {
-        // Normalises the reflection and refraction coefficients to make them conserve energy
-        let mut coeffs = vec![reflect_weight, refract_weight];
-        normalise_colour_coefficients(&mut coeffs);
-
         GlobalMaterial {
-            reflect_weight: coeffs[0],
-            refract_weight: coeffs[1],
+            reflect_weight,
+            refract_weight,
             alpha,
             ior,
         }
@@ -105,14 +102,14 @@ impl GlobalMaterial {
         direct: bool,
         inside: bool,
     ) -> Colour {
-        // Calculates the number of monte carlo rays to be used for sampling the glossy colour
+        // Calculates the number of Monte Carlo rays to be used for sampling the glossy colour
         let monte_carlo_rays = if direct { SPECULAR_SAMPLES } else { 1 };
 
         let mut colour = Colour::black();
         for _ in 0..monte_carlo_rays {
             let sample_dir = Vector::sample_specular_vector(ideal_dir, cos_i, self.alpha);
 
-            // Traces the monte carlo ray to get its colour contribution
+            // Traces the Monte Carlo ray to get its colour contribution
             let ray = Ray::offset_inside(hit.position, sample_dir, inside);
             colour += scene.raytrace(&ray, recurse - 1, false);
         }
@@ -166,9 +163,18 @@ impl MaterialTrait for GlobalMaterial {
             )
         };
 
+        // Normalises the reflection and refraction coefficients to make them conserve energy
+        let mut coeffs = vec![
+            self.reflect_weight.get_colour_at(hit),
+            self.refract_weight.get_colour_at(hit)
+        ];
+        normalise_colour_coefficients(&mut coeffs);
+        let reflect_weight = coeffs[0];
+        let refract_weight = coeffs[1];
+
         // Computes colour based on the reflect and refract weights combined with the Fresnel reflectance term
-        (self.reflect_weight + reflectance * self.refract_weight) * reflection
-            + (1.0 - reflectance) * self.refract_weight * refraction
+        (reflect_weight + reflectance * refract_weight) * reflection
+            + (1.0 - reflectance) * refract_weight * refraction
     }
 
     fn compute_per_light(
@@ -203,9 +209,18 @@ impl MaterialTrait for GlobalMaterial {
         // Computes Fresnel reflectance using Schlick's approximation
         let reflectance = Self::schlick(n1, n2, cos_i, sin_t_sqr, cos_t);
 
+        // Normalises the reflection and refraction coefficients to make them conserve energy
+        let mut coeffs = vec![
+            self.reflect_weight.get_colour_at(hit),
+            self.refract_weight.get_colour_at(hit)
+        ];
+        normalise_colour_coefficients(&mut coeffs);
+        let reflect_weight = coeffs[0];
+        let refract_weight = coeffs[1];
+
         // Computes probabilities of reflection and refraction based on their weights and Fresnel reflectance
-        let refract_max = self.refract_weight.max();
-        let reflect_prob = self.reflect_weight.max() + reflectance * refract_max;
+        let refract_max = refract_weight.max();
+        let reflect_prob = reflect_weight.max() + reflectance * refract_max;
         let refract_prob = (1.0 - reflectance) * refract_max;
 
         // Selects whether to reflect or refract the photon using Russian roulette based on these probabilities
@@ -216,7 +231,7 @@ impl MaterialTrait for GlobalMaterial {
             let reflect_dir = Vector::sample_specular_vector(&ideal_dir, cos_i, self.alpha);
 
             // Scales the photon's power by its probability of reflection and reflected colour
-            *power *= (self.reflect_weight + reflectance * self.refract_weight) / reflect_prob;
+            *power *= (reflect_weight + reflectance * refract_weight) / reflect_prob;
 
             Some((
                 Ray::offset(hit.position, reflect_dir),
@@ -228,7 +243,7 @@ impl MaterialTrait for GlobalMaterial {
             let refract_dir = Vector::sample_specular_vector(&ideal_dir, cos_i, self.alpha);
 
             // Scales the photon's power by its probability of refraction and refracted colour
-            *power *= self.refract_weight * ((1.0 - reflectance) / refract_prob);
+            *power *= refract_weight * ((1.0 - reflectance) / refract_prob);
 
             Some((
                 Ray::offset_inside(hit.position, refract_dir, hit.entering),
@@ -245,8 +260,8 @@ impl MaterialTrait for GlobalMaterial {
 impl FromYaml for GlobalMaterial {
     fn from_yaml(yaml: &Yaml) -> Result<GlobalMaterial, YamlPropertyError> {
         // Parses properties for the material
-        let reflect_weight = parse_struct(yaml, "reflect_weight").unwrap_or(Colour::black());
-        let refract_weight = parse_struct(yaml, "refract_weight").unwrap_or(Colour::black());
+        let reflect_weight = parse_struct(yaml, "reflect_weight").unwrap_or(Colour::black().into());
+        let refract_weight = parse_struct(yaml, "refract_weight").unwrap_or(Colour::black().into());
         let alpha = parse_float(yaml, "alpha").unwrap_or(10000.0);
         let ior = parse_float(yaml, "ior").unwrap_or(1.0);
 

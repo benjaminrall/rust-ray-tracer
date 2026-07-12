@@ -7,29 +7,19 @@ use crate::utils::{random_float, ScatterType, Vector};
 use crate::{DIRECT_SAMPLES, EPSILON};
 use std::f64::consts::PI;
 use yaml_rust::Yaml;
+use crate::textures::{TextureTrait, Texture};
 
 #[derive(Debug)]
 /// Material to be used by a scattering volume.
 pub struct VolumeMaterial {
-    colour: Colour,                     // The colour component of the scattering volume
-    scatter_coefficients_recip: Colour, // Reciprocal of the scatter coefficients used for indirect lighting
+    albedo: Texture,                    // The colour component of the scattering volume as a texture
+    density: f64,                       // The density of the volume
 }
 
 impl VolumeMaterial {
     /// Creates a new `VolumeMaterial` instance with the given colour and density.
-    pub fn new(colour: Colour, density: f64) -> VolumeMaterial {
-        // Calculates the reciprocal scatter coefficients from the volume's density and colour
-        let scatter_coefficients = colour * density;
-        let scatter_coefficients_recip = Colour::new(
-            1.0 / scatter_coefficients.r,
-            1.0 / scatter_coefficients.g,
-            1.0 / scatter_coefficients.b,
-        );
-
-        VolumeMaterial {
-            colour,
-            scatter_coefficients_recip,
-        }
+    pub fn new(albedo: Texture, density: f64) -> VolumeMaterial {
+        VolumeMaterial { albedo, density }
     }
 }
 
@@ -42,8 +32,16 @@ impl MaterialTrait for VolumeMaterial {
         scene: &Scene,
         _direct: bool,
     ) -> Colour {
+        // Calculates the reciprocal scatter coefficients from the volume's density and colour
+        let scatter_coefficients = self.albedo.get_colour_at(hit) * self.density;
+        let scatter_coefficients_recip = Colour::new(
+            1.0 / scatter_coefficients.r,
+            1.0 / scatter_coefficients.g,
+            1.0 / scatter_coefficients.b,
+        );
+
         // Computes and returns the volume's indirect lighting
-        self.scatter_coefficients_recip
+        scatter_coefficients_recip
             * scene.volume_radiance_estimate(hit, |photon| {
                 self.compute_per_photon(incident, hit, photon)
             })
@@ -88,14 +86,15 @@ impl MaterialTrait for VolumeMaterial {
         // Averages the scattered contribution over all samples and the area of the light
         // Uses a uniform probability density function for the sphere surrounding the hit point
         if total_samples > 0 {
-            scattered *= self.colour * light.get_area() / (total_samples as f64 * 4.0 * PI);
+            scattered *=
+                self.albedo.get_colour_at(hit) * light.get_area() / (total_samples as f64 * 4.0 * PI);
         }
 
         scattered
     }
 
-    fn compute_per_photon(&self, _incident: &Ray, _hit: &Hit, photon: &Photon) -> Colour {
-        self.colour * photon.power
+    fn compute_per_photon(&self, _incident: &Ray, hit: &Hit, photon: &Photon) -> Colour {
+        self.albedo.get_colour_at(hit) * photon.power
     }
 
     fn scatter_photon(
@@ -105,7 +104,8 @@ impl MaterialTrait for VolumeMaterial {
         power: &mut Colour,
     ) -> Option<(Ray, ScatterType)> {
         // Calculates the probability of the photon scattering
-        let ps = (self.colour * *power).max() / power.max();
+        let albedo = self.albedo.get_colour_at(hit);
+        let ps = (albedo * *power).max() / power.max();
 
         // Performs Russian Roulette using this probability
         let eta = random_float();
@@ -114,7 +114,7 @@ impl MaterialTrait for VolumeMaterial {
             let reflected_dir = Vector::random_unit_vector();
 
             // Adjusts the power of the reflected photon by its probability of survival
-            *power *= self.colour / ps;
+            *power *= albedo / ps;
 
             // Returns the scattered ray
             Some((
@@ -132,9 +132,9 @@ impl MaterialTrait for VolumeMaterial {
 impl FromYaml for VolumeMaterial {
     fn from_yaml(yaml: &Yaml) -> Result<VolumeMaterial, YamlPropertyError> {
         // Parses properties for the material
-        let colour = parse_struct(yaml, "colour")?;
+        let albedo = parse_struct(yaml, "albedo")?;
         let density = parse_float(yaml, "density")?;
 
-        Ok(VolumeMaterial::new(colour, density))
+        Ok(VolumeMaterial::new(albedo, density))
     }
 }

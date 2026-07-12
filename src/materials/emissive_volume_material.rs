@@ -9,7 +9,8 @@ use yaml_rust::Yaml;
 
 #[derive(Debug)]
 /// Material to represent emissive volumes.
-/// Works by returning a flat colour (optionally from a texture), which should be equal to the intensity of the light source.
+/// Works by returning a flat colour (optionally from a texture),
+/// which should be equal to the intensity of the light source.
 pub struct EmissiveVolumeMaterial {
     intensity: Texture,
     density: f64,
