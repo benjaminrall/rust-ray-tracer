@@ -254,6 +254,10 @@ impl MaterialTrait for GlobalMaterial {
             None
         }
     }
+
+    fn is_diffuse(&self) -> bool {
+        false
+    }
 }
 
 /// Implements loading a `GlobalMaterial` from a YAML file.

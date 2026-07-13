@@ -126,6 +126,10 @@ impl MaterialTrait for VolumeMaterial {
             None
         }
     }
+
+    fn is_diffuse(&self) -> bool {
+        false
+    }
 }
 
 /// Implements loading a `VolumeMaterial` from a YAML file.

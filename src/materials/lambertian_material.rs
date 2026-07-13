@@ -132,6 +132,10 @@ impl MaterialTrait for LambertianMaterial {
             None
         }
     }
+
+    fn is_diffuse(&self) -> bool {
+        true
+    }
 }
 
 /// Implements loading a `LambertianMaterial` from a YAML file.

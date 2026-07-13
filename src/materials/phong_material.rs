@@ -291,6 +291,10 @@ impl MaterialTrait for PhongMaterial {
             None
         }
     }
+
+    fn is_diffuse(&self) -> bool {
+        true
+    }
 }
 
 /// Implements loading a `PhongMaterial` from a YAML file.

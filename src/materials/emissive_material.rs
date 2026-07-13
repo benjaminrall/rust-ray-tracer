@@ -62,6 +62,10 @@ impl MaterialTrait for EmissiveMaterial {
     ) -> Option<(Ray, ScatterType)> {
         None
     }
+
+    fn is_diffuse(&self) -> bool {
+        false
+    }
 }
 
 /// Implements loading an `EmissiveMaterial` from a YAML file.

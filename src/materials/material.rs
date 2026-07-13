@@ -92,6 +92,9 @@ pub trait MaterialTrait {
         hit: &Hit,
         power: &mut Colour,
     ) -> Option<(Ray, ScatterType)>;
+
+    /// Returns the material's primary scatter type.
+    fn is_diffuse(&self) -> bool;
 }
 
 /// Implements loading `Material` structs from a YAML file.
