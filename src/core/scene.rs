@@ -231,18 +231,22 @@ impl Scene {
                 ));
 
                 // Scatters the photon based on the material's properties
+                let incoming_power = power;
                 if let Some((new_ray, scatter_type)) =
                     material.scatter_photon(&photon_ray, &hit, &mut power)
                 {
                     // Stores the photon if there was a diffuse interaction
                     if scatter_type == ScatterType::Diffuse {
-                        photons.push(Photon::new(hit.position, -photon_ray.direction, power))
+                        photons.push(Photon::new(hit.position, -photon_ray.direction, incoming_power))
                     }
 
                     // Updates the photon ray to its scattered direction
                     photon_ray = new_ray
                 } else {
-                    // Breaks if the photon was absorbed
+                    // Breaks if the photon was absorbed, storing the photon if it hit a diffuse surface
+                    if material.is_diffuse() {
+                        photons.push(Photon::new(hit.position, -photon_ray.direction, incoming_power))
+                    }
                     break;
                 }
             } else {
@@ -282,12 +286,13 @@ impl Scene {
                 ));
 
                 // Scatters the photon based on the material's properties
+                let incoming_power = power;
                 if let Some((new_ray, scatter_type)) =
                     material.scatter_photon(&photon_ray, &hit, &mut power)
                 {
                     if scatter_type == ScatterType::Diffuse && store {
                         // Stores the photon if it hit a diffuse surface after hitting a specular surface
-                        photons.push(Photon::new(hit.position, -photon_ray.direction, power));
+                        photons.push(Photon::new(hit.position, -photon_ray.direction, incoming_power));
                         break;
                     } else if scatter_type == ScatterType::Specular {
                         // Enables storing of photons if a specular surface was hit
@@ -340,12 +345,13 @@ impl Scene {
                 ));
 
                 // Scatters the photon based on the material's properties
+                let incoming_power = power;
                 if let Some((new_ray, scatter_type)) =
                     material.scatter_photon(&photon_ray, &hit, &mut power)
                 {
                     // Stores the photon if it hit a volume indirectly
                     if scatter_type == ScatterType::Volume && store {
-                        photons.push(Photon::new(hit.position, -photon_ray.direction, power))
+                        photons.push(Photon::new(hit.position, -photon_ray.direction, incoming_power))
                     }
 
                     // Enables storing of photons after any scattering event
@@ -438,8 +444,8 @@ impl Scene {
             .min_by(|hit1, hit2| hit1.t.partial_cmp(&hit2.t).unwrap_or(Equal))
     }
 
-    /// Traces a Monte Carlo ray through the scene until it hits a diffuse surface
-    /// for accurate indirect lighting computation.
+    /// Traces a Monte Carlo ray through the scene until it hits a diffuse surface or
+    /// a scattering volume for accurate indirect lighting computation.
     pub fn indirect_raytrace(&self, mut ray: Ray) -> Colour {
         // Initialises the weight of the colour, used in place of a photon's power, to model scattering behaviour
         let mut weight = Colour::white();
@@ -455,6 +461,7 @@ impl Scene {
                 ));
 
                 // Scatters the ray as if it were a photon, based on the material's properties
+                let current_weight = weight;
                 if let Some((new_ray, scatter_type)) =
                     material.scatter_photon(&ray, &hit, &mut weight)
                 {
@@ -462,7 +469,18 @@ impl Scene {
                         // Computes and returns the weighted global radiance estimate for the hit
                         return self.global_radiance_estimate(&hit, |photon| {
                             material.compute_per_photon(&ray, &hit, photon)
-                        }) * weight;
+                        }) * current_weight;
+                    } else if scatter_type == ScatterType::Volume {
+                        // Computes indirect volume lighting via the volume photon map
+                        let mut volume_radiance = material.compute_once(&ray, &hit, 0, self, false);
+
+                        // Gathers direct lighting on the volume
+                        for light in self.lights.iter() {
+                            volume_radiance += material.compute_per_light(&ray, &hit, light, self, false);
+                        }
+
+                        // Returns radiance estimate for the volume hit
+                        return volume_radiance * current_weight;
                     }
 
                     // Updates the ray to its scattered direction
